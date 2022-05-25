@@ -18,7 +18,7 @@ public class App
 {
     private static Logger logger = Logger.getLogger(App.class.getName());
     
-    /** data loaded from given dataset file*/
+    /** data loaded from given dataset file. It is assumed that the dataset is a time serie*/
     private static Instances dataset;
     private static final Set<Classifiers> requestedClassifiers = EnumSet.noneOf(Classifiers.class);
     private static final Set<Classifier> classifiers = new HashSet<>();  
@@ -29,6 +29,7 @@ public class App
         File datasetFile = new File(args[0]);
         if (datasetFile.exists()){
             dataset = new DataSource(datasetFile.getAbsolutePath()).getDataSet();
+            dataset.setClassIndex(dataset.numAttributes() - 1);
         } else {
             throw new UnableToFindDatasetFileException(datasetFile.getName());
         }
@@ -68,8 +69,6 @@ public class App
 
         // prepare classifiers
         prepareClassifiers();
-        Set<Classifier> test = classifiers;
-        int test2 = 0;
 
         // TODO: prepare evaluation matrix
 

@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
+import weka.filters.Filter;
 
 /**
  * WalkForward implementation algorithm.
@@ -39,7 +40,7 @@ public class WalkForward implements Iterator<Evaluation>{
     public boolean hasNext() {
         return i != data.size() - 1;
     }
-
+    
     @Override
     public Evaluation next() {
         
@@ -52,10 +53,14 @@ public class WalkForward implements Iterator<Evaluation>{
         
         try {
             
-            // updates current iteration state
-            train.add(data.get(i - 1));
+            // updates training set with (i-i)-release entries
+            train.addAll(Filter.useFilter(data, new ReleaseFilter(data, i - 1)));
+
+            // takes i-release as the testing set
             test.clear();
-            test.add(data.get(i));
+            test.addAll(Filter.useFilter(data, new ReleaseFilter(data, i)));
+            
+            // updates remaining current iteration state
             classifier = classifierClass.getConstructor().newInstance();
             i ++;
 
