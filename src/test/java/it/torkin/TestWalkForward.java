@@ -2,6 +2,7 @@ package it.torkin;
 
 import java.io.File;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import weka.classifiers.bayes.NaiveBayes;
@@ -11,6 +12,7 @@ import weka.core.converters.ConverterUtils.DataSource;
 
 public class TestWalkForward {
 
+    @Ignore
     @Test
     public void test() throws Exception{
         
