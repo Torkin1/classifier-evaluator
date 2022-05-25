@@ -5,10 +5,6 @@ import java.io.File;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
-/**
- * Hello world!
- *
- */
 public class App 
 {
     /** data loaded from given dataset file*/
@@ -28,6 +24,14 @@ public class App
     public static void main( String[] args ) throws Exception 
     {
         parseArgs(args);
+
+        // TODO: prepare classifiers
+
+        // TODO: prepare evaluation matrix
+
+        // TODO: populate evaluation matrix with evaluations from walkForward iterations and calculate average
+
+        // TODO: dump evaluations in csv file
         
     }
 }
