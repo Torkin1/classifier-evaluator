@@ -6,17 +6,11 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Launch Current File",
-            "request": "launch",
-            "mainClass": "${file}"
-        },
-        {
-            "type": "java",
             "name": "Launch App",
             "request": "launch",
             "mainClass": "it.torkin.App",
             "projectName": "classifier-evaluator",
-            "args": "datasets/Torkin1_avro_dataset_50%.csv"
+            "args": "/run/media/daniele/614F7D537CF390D4/corsi/ISW2/hw_falessi/buggynessCrawler/datasets/Torkin1_avro_dataset_50%.csv naiveBayes,randomForest,ibk"
         }
     ]
 }
