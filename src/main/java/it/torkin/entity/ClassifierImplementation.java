@@ -1,4 +1,4 @@
-package it.torkin;
+package it.torkin.entity;
 
 import java.util.EnumSet;
 import java.util.NoSuchElementException;
@@ -8,7 +8,7 @@ import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.lazy.IBk;
 import weka.classifiers.trees.RandomForest;
 
-public enum Classifiers {
+public enum ClassifierImplementation {
 
     NAIVE_BAYES("naiveBayes", NaiveBayes.class),
     RANDOM_FOREST("randomForest", RandomForest.class),
@@ -18,7 +18,7 @@ public enum Classifiers {
     private final String name;
     private final Class<? extends Classifier> implementation;
 
-    private Classifiers(String name, Class<? extends Classifier> implementation){
+    private ClassifierImplementation(String name, Class<? extends Classifier> implementation){
         this.name = name;
         this.implementation = implementation;
     }
@@ -31,8 +31,8 @@ public enum Classifiers {
         return implementation;
     }
 
-    public static Classifiers getClassifier(String name) {
-        for (Classifiers c : EnumSet.allOf(Classifiers.class)) {
+    public static ClassifierImplementation getClassifier(String name) {
+        for (ClassifierImplementation c : EnumSet.allOf(ClassifierImplementation.class)) {
             if (c.getName().equals(name)) {
                 return c;
             }

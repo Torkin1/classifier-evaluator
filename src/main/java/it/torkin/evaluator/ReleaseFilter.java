@@ -1,8 +1,9 @@
-package it.torkin;
+package it.torkin.evaluator;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import it.torkin.entity.ProjectResourceInstance;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -17,9 +18,9 @@ public class ReleaseFilter extends RemoveWithValues{
         String name;
         Set<String> seen = new HashSet<>();
         for (Instance datum : data) {
-            name = datum.stringValue(new CustomInstanceHelper(datum).getReleaseAttribute());
+            name = datum.stringValue(new ProjectResourceInstance(datum).getReleaseAttribute());
             seen.add(name);
-            if (seen.size() == i + 1) {
+            if (seen.size() - 1 == i) {
                 return name;
             }
         }
@@ -40,8 +41,8 @@ public class ReleaseFilter extends RemoveWithValues{
         super.setInputFormat(dataset);
 
         String releaseName = getReleaseName(dataset, releaseIndex);
-        Attribute release = new CustomInstanceHelper(dataset.get(0)).getReleaseAttribute();
-        String[] options = {"-C", String.valueOf(release.index() + 1), "-L", String.valueOf(release.indexOfValue(releaseName) + 1)};
+        Attribute release = new ProjectResourceInstance(dataset.get(0)).getReleaseAttribute();
+        String[] options = {"-C", String.valueOf(release.index() + 1), "-L", String.valueOf(release.indexOfValue(releaseName) + 1), "-V"};
         super.setOptions(options);
     }
     

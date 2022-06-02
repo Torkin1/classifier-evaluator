@@ -1,4 +1,4 @@
-package it.torkin;
+package it.torkin.evaluator;
 
 public class UnableToGenerateNextEvaluationException extends RuntimeException{
 

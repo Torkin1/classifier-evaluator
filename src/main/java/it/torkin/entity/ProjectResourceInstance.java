@@ -1,4 +1,4 @@
-package it.torkin;
+package it.torkin.entity;
 
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
@@ -7,7 +7,8 @@ import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class CustomInstanceHelper implements Instance{
+/** a Instance object of a buggyness dataset */
+public class ProjectResourceInstance implements Instance{
 
     private Instance decorated;
     public Object copy() {
@@ -218,7 +219,7 @@ public class CustomInstanceHelper implements Instance{
         return decorated.weight();
     }
 
-    public CustomInstanceHelper(Instance instance) {
+    public ProjectResourceInstance(Instance instance) {
         this.decorated = instance;
     }
     
