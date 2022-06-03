@@ -110,22 +110,23 @@ public class App
                 // prints values
                 int positiveIndex = dataset.classAttribute().indexOfValue(Buggyness.YES.getNominalValue());
                 for (RichEvaluation e : evaluations){
-                    printer.print(e.getDatasetName());
-                    printer.print(e.getClassifier().getName());
-                    printer.print(e.isDatasetStratified());
-                    printer.print(e.getNumOfTrainingReleases());
-                    printer.print(e.getTrainingPercentage());
-                    printer.print(e.getDefectiveInTrainingPercentage());
-                    printer.print(e.getDefectiveInTestingPercentage());
-                    printer.print(e.numTruePositives(positiveIndex));
-                    printer.print(e.numFalsePositives(positiveIndex));
-                    printer.print(e.numTrueNegatives(positiveIndex));
-                    printer.print(e.numFalseNegatives(positiveIndex));
-                    printer.print(e.precision(positiveIndex));
-                    printer.print(e.recall(positiveIndex));
-                    printer.print(e.areaUnderPRC(positiveIndex));
-                    printer.print(e.kappa());
-                    printer.println();
+                    printer.printRecord(
+                        e.getDatasetName()
+                        ,e.getClassifier().getName()
+                        ,e.isDatasetStratified()
+                        ,e.getNumOfTrainingReleases()
+                        ,e.getTrainingPercentage()
+                        ,e.getDefectiveInTrainingPercentage()
+                        ,e.getDefectiveInTestingPercentage()
+                        ,e.numTruePositives(positiveIndex)
+                        ,e.numFalsePositives(positiveIndex)
+                        ,e.numTrueNegatives(positiveIndex)
+                        ,e.numFalseNegatives(positiveIndex)
+                        ,e.precision(positiveIndex)
+                        ,e.recall(positiveIndex)
+                        ,e.areaUnderPRC(positiveIndex)  // we use AUC of precision - recall curve
+                        ,e.kappa()
+                    );
                 }
 
                 msg = String.format("evaluation data available at %s", output);
