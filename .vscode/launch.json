@@ -6,11 +6,75 @@
     "configurations": [
         {
             "type": "java",
+            "name": "evaluation only",
+            "request": "launch",
+            "mainClass": "it.torkin.App",
+            "projectName": "classifier-evaluator",
+            "args": "/run/media/daniele/614F7D537CF390D4/corsi/ISW2/hw_falessi/buggynessCrawler/datasets/Torkin1_avro_dataset_50%.csv,/run/media/daniele/614F7D537CF390D4/corsi/ISW2/hw_falessi/buggynessCrawler/datasets/Torkin1_bookkeeper_50%_dataset.csv naiveBayes,randomForest,ibk none forward"
+        },
+        {
+            "type": "java",
             "name": "FS (forward wrapper)",
             "request": "launch",
             "mainClass": "it.torkin.App",
             "projectName": "classifier-evaluator",
-            "args": "/run/media/daniele/614F7D537CF390D4/corsi/ISW2/hw_falessi/buggynessCrawler/datasets/Torkin1_avro_dataset_50%.csv naiveBayes,randomForest,ibk wrapper forward"
+            "args": "/run/media/daniele/614F7D537CF390D4/corsi/ISW2/hw_falessi/buggynessCrawler/datasets/Torkin1_avro_dataset_50%.csv,/run/media/daniele/614F7D537CF390D4/corsi/ISW2/hw_falessi/buggynessCrawler/datasets/Torkin1_bookkeeper_50%_dataset.csv  naiveBayes,randomForest,ibk wrapper forward"
+        },
+        {
+            "type": "java",
+            "name": "FS (backward wrapper)",
+            "request": "launch",
+            "mainClass": "it.torkin.App",
+            "projectName": "classifier-evaluator",
+            "args": "/run/media/daniele/614F7D537CF390D4/corsi/ISW2/hw_falessi/buggynessCrawler/datasets/Torkin1_avro_dataset_50%.csv,/run/media/daniele/614F7D537CF390D4/corsi/ISW2/hw_falessi/buggynessCrawler/datasets/Torkin1_bookkeeper_50%_dataset.csv  naiveBayes,randomForest,ibk wrapper backward"
+        },
+        {
+            "type": "java",
+            "name": "FS (forward filter)",
+            "request": "launch",
+            "mainClass": "it.torkin.App",
+            "projectName": "classifier-evaluator",
+            "args": "/run/media/daniele/614F7D537CF390D4/corsi/ISW2/hw_falessi/buggynessCrawler/datasets/Torkin1_avro_dataset_50%.csv,/run/media/daniele/614F7D537CF390D4/corsi/ISW2/hw_falessi/buggynessCrawler/datasets/Torkin1_bookkeeper_50%_dataset.csv  naiveBayes,randomForest,ibk filter forward"
+        },
+        {
+            "type": "java",
+            "name": "FS (backward filter)",
+            "request": "launch",
+            "mainClass": "it.torkin.App",
+            "projectName": "classifier-evaluator",
+            "args": "/run/media/daniele/614F7D537CF390D4/corsi/ISW2/hw_falessi/buggynessCrawler/datasets/Torkin1_avro_dataset_50%.csv,/run/media/daniele/614F7D537CF390D4/corsi/ISW2/hw_falessi/buggynessCrawler/datasets/Torkin1_bookkeeper_50%_dataset.csv  naiveBayes,randomForest,ibk filter backward"
+        },
+        {
+            "type": "java",
+            "name": "FS (forward filter, wrapper)",
+            "request": "launch",
+            "mainClass": "it.torkin.App",
+            "projectName": "classifier-evaluator",
+            "args": "/run/media/daniele/614F7D537CF390D4/corsi/ISW2/hw_falessi/buggynessCrawler/datasets/Torkin1_avro_dataset_50%.csv,/run/media/daniele/614F7D537CF390D4/corsi/ISW2/hw_falessi/buggynessCrawler/datasets/Torkin1_bookkeeper_50%_dataset.csv  naiveBayes,randomForest,ibk filter,wrapper forward"
+        },
+        {
+            "type": "java",
+            "name": "FS (backward filter, wrapper)",
+            "request": "launch",
+            "mainClass": "it.torkin.App",
+            "projectName": "classifier-evaluator",
+            "args": "/run/media/daniele/614F7D537CF390D4/corsi/ISW2/hw_falessi/buggynessCrawler/datasets/Torkin1_avro_dataset_50%.csv,/run/media/daniele/614F7D537CF390D4/corsi/ISW2/hw_falessi/buggynessCrawler/datasets/Torkin1_bookkeeper_50%_dataset.csv  naiveBayes,randomForest,ibk filter,wrapper backward"
+        },
+    ],
+    "compounds": [
+        {
+            "name": "Fire all systems",
+            "configurations": [
+                "evaluation only",
+                "FS (forward wrapper)",
+                "FS (backward wrapper)",
+                "FS (forward filter)",
+                //"FS (backward filter)",
+                "FS (forward filter, wrapper)",
+                //"FS (backward filter, wrapper)"
+            ],
+            "stopAll": true
+
         }
     ]
 }

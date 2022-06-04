@@ -1,5 +1,7 @@
 package it.torkin.entity;
 
+import java.util.Set;
+
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
@@ -23,11 +25,10 @@ public class RichEvaluation extends Evaluation{
     private ClassifierImplementation classifier;
     /**wheter or not classes in datatset are present with same number of representing individuals */
     private boolean isDatasetStratified;
-    /**TODO: What kind of feature selection has been used*/
-    //private FeatureSelectionApproach featureSelectionApproach;
-    /**TODO: balancing */
-    /**TODO: costs sensitivity */
-
+    /**What kind of feature selection has been used*/
+    private Set<FeatureSelectionApproach> featureSelectionApproaches;
+    /** feature selection search sense */
+    private boolean isFeatureSearchBackward;
 
     @Override
     public boolean equals(Object obj) {
@@ -79,12 +80,17 @@ public class RichEvaluation extends Evaluation{
     public void setDatasetStratified(boolean isDatasetStratified) {
         this.isDatasetStratified = isDatasetStratified;
     }
-    /* 
-    public FeatureSelectionApproach getFeatureSelectionApproach() {
-        return featureSelectionApproach;
+    public Set<FeatureSelectionApproach> getFeatureSelectionApproaches() {
+        return featureSelectionApproaches;
     }
-    public void setFeatureSelectionApproach(FeatureSelectionApproach featureSelectionApproach) {
-        this.featureSelectionApproach = featureSelectionApproach;
-    } 
-    */   
+    public void setFeatureSelectionApproaches(Set<FeatureSelectionApproach> featureSelectionApproaches) {
+        this.featureSelectionApproaches = featureSelectionApproaches;
+    }
+    public boolean isFeatureSearchBackward() {
+        return isFeatureSearchBackward;
+    }
+    public void setFeatureSearchBackward(boolean isFeatureSearchBackward) {
+        this.isFeatureSearchBackward = isFeatureSearchBackward;
+    }
+    
 }

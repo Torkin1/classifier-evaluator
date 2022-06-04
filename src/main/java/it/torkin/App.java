@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -20,6 +20,7 @@ import it.torkin.entity.ClassifierImplementation;
 import it.torkin.entity.FeatureSelectionApproach;
 import it.torkin.entity.RichEvaluation;
 import it.torkin.evaluator.WalkForward;
+
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.CfsSubsetEval;
 import weka.attributeSelection.GreedyStepwise;
@@ -35,9 +36,9 @@ public class App
     private static final Logger logger = Logger.getLogger(App.class.getName());
     
     /** data loaded from given dataset file. It is assumed that the dataset is a time serie*/
-    private static Instances dataset;
+    private static List<Instances> datasets = new ArrayList<>();
     private static final Set<ClassifierImplementation> requestedClassifiers = EnumSet.noneOf(ClassifierImplementation.class);
-    private static final Set<Classifier> classifiers = new HashSet<>();
+    private static final Set<Classifier> classifiers = new LinkedHashSet<>();
     private static final Set<FeatureSelectionApproach> requestedFeatureSelectionApproaches = EnumSet.noneOf(FeatureSelectionApproach.class);
     private static boolean isFeatureSearchBackward;  
         
@@ -47,12 +48,19 @@ public class App
         String token;
         
         // args[0]: path to file containing the dataset
-        File datasetFile = new File(args[0]);
-        if (datasetFile.exists()){
-            dataset = new DataSource(datasetFile.getAbsolutePath()).getDataSet();
-            dataset.setClassIndex(Buggyness.getFeatureIndex(dataset.numAttributes()));
-        } else {
-            throw new UnableToFindDatasetFileException(datasetFile.getName());
+        File datasetFile;
+        Instances dataset;
+        tokenizer = new StringTokenizer(args[0], ",");
+        while (tokenizer.hasMoreTokens()) {
+            token = tokenizer.nextToken();
+            datasetFile = new File(token);
+            if (datasetFile.exists()) {
+                dataset = new DataSource(datasetFile.getAbsolutePath()).getDataSet();
+                dataset.setClassIndex(Buggyness.getFeatureIndex(dataset.numAttributes()));
+                datasets.add(dataset);
+            } else {
+                throw new UnableToFindDatasetFileException(datasetFile.getName());
+            }
         }
 
         // args[1]: comma-separated list of classifer names to evaluate
@@ -100,6 +108,14 @@ public class App
         }
     }
     
+    private static String getDatasetsNames(){
+        Set<String> names = new LinkedHashSet<>();
+        for (Instances dataset : datasets){
+            names.add(dataset.relationName());
+        }
+        return names.toString();
+    }
+    
     private static void printEvaluations(List<RichEvaluation> evaluations) throws UnableToPrintEvaluationsException {
 
         String msg;
@@ -108,7 +124,7 @@ public class App
         String outputName = outputDirName
          + File.separator 
          + "evaluation_" 
-         + dataset.relationName() 
+         + getDatasetsNames() 
          + "_" + requestedClassifiers.toString() 
          + "_" + requestedFeatureSelectionApproaches.toString() + "-" + ((isFeatureSearchBackward)? "backward" : "forward") 
          + ".csv";
@@ -123,9 +139,10 @@ public class App
                 printer.printRecord(
                     "dataset name"
                     ,"classifier"
-                    ,"dataset stratified?"
                     ,"#trainingReleases"
                     ,"%trainingRelease"
+                    ,"feature selection approaches"
+                    ,"is feature search backward?"
                     ,"%defective in training"
                     ,"%defective in testing"
                     ,"#TPs"
@@ -139,14 +156,15 @@ public class App
                 );
 
                 // prints values
-                int positiveIndex = dataset.classAttribute().indexOfValue(Buggyness.YES.getNominalValue());
+                int positiveIndex = datasets.get(0).classAttribute().indexOfValue(Buggyness.YES.getNominalValue());
                 for (RichEvaluation e : evaluations){
                     printer.printRecord(
                         e.getDatasetName()
                         ,e.getClassifier().getName()
-                        ,e.isDatasetStratified()
                         ,e.getNumOfTrainingReleases()
                         ,e.getTrainingPercentage()
+                        ,e.getFeatureSelectionApproaches().toString().replace(',', ' ')
+                        ,e.isFeatureSearchBackward()
                         ,e.getDefectiveInTrainingPercentage()
                         ,e.getDefectiveInTestingPercentage()
                         ,e.numTruePositives(positiveIndex)
@@ -166,9 +184,22 @@ public class App
             } catch (IOException e){
                 throw new UnableToPrintEvaluationsException(e);
             }
-        }
+    }
+    
+    private static AttributeSelection prepareFeatureSelectionFilter(Instances dataset) throws Exception{
+        AttributeSelection filter = new AttributeSelection();
+        GreedyStepwise search = new GreedyStepwise();
+        search.setStartSet("1");    // assuming that "Release" attribute is the first column
+        ASEvaluation eval = new CfsSubsetEval();
+        search.setSearchBackwards(isFeatureSearchBackward);
+        filter.setInputFormat(dataset);
+        filter.setSearch(search);
+        filter.setEvaluator(eval);
+        return filter;
+}
 
-    public static void main( String[] args ) throws Exception 
+    
+        public static void main( String[] args ) throws Exception 
     {
         Instances evaluationDataset;
         Classifier classifier;
@@ -182,47 +213,49 @@ public class App
         // prepare classifiers
         prepareClassifiers();
 
-        evaluationDataset = dataset;
-        // change working datatset with filtered one obtained by filter feature selection approach if requested
-        if (requestedFeatureSelectionApproaches.contains(FeatureSelectionApproach.FILTER)){
-            AttributeSelection filter = new AttributeSelection();
-            GreedyStepwise search = new GreedyStepwise();
-            ASEvaluation eval = new CfsSubsetEval();
-            search.setSearchBackwards(isFeatureSearchBackward);
-            filter.setInputFormat(dataset);
-            filter.setSearch(search);
-            filter.setEvaluator(eval);
-            evaluationDataset = Filter.useFilter(dataset, filter);
-        }
-
-        // for each classifier, gets one evaluation for each walkforward iteration 
-        for (ClassifierImplementation requestedClassifier : requestedClassifiers){
-
-            msg = String.format("evaluating classifier: %s", requestedClassifier.getName());
+        for (Instances dataset : datasets){
+            msg = String.format("using dataset %s", dataset.relationName());
             logger.info(msg);
-            classifier = requestedClassifier.getImplementation().getConstructor().newInstance();
-            // change classifer with wrapper feature selection meta-classifier if requested
-            if (requestedFeatureSelectionApproaches.contains(FeatureSelectionApproach.WRAPPER)){
-                AttributeSelectedClassifier wrapper = new AttributeSelectedClassifier();
-                GreedyStepwise search = new GreedyStepwise();
-                ASEvaluation eval = new CfsSubsetEval();
-                search.setSearchBackwards(isFeatureSearchBackward);
-                wrapper.setClassifier(classifier);
-                wrapper.setEvaluator(eval);
-                wrapper.setSearch(search);
-                classifier = wrapper;
+            evaluationDataset = dataset;
+            // change working datatset with filtered one obtained by filter feature selection approach if requested
+            if (requestedFeatureSelectionApproaches.contains(FeatureSelectionApproach.FILTER)){
+                if (isFeatureSearchBackward){
+                    throw new UnsupportedOperationException("Using filter FS approach with backward feature search is not supported (no way to guarantee that attribute \"Release\" is not discarded)");
+                }
+                AttributeSelection featureSelectionFilter = prepareFeatureSelectionFilter(dataset);
+                Filter.useFilter(dataset, featureSelectionFilter);
             }
-            
-            walkForward = new WalkForward(classifier, evaluationDataset);
-            while(walkForward.hasNext()){
-                evaluation = walkForward.next();
-                // TODO: set feature selection approach in evaluation object
-                // TODO: set whetever dataset was stratified before evaluation or not
-                evaluation.setDatasetName(dataset.relationName());
-                evaluation.setClassifier(requestedClassifier);
-                evaluations.add(evaluation);
+    
+            // for each classifier, gets one evaluation for each walkforward iteration 
+            for (ClassifierImplementation requestedClassifier : requestedClassifiers){
+    
+                msg = String.format("evaluating classifier: %s", requestedClassifier.getName());
+                logger.info(msg);
+                classifier = requestedClassifier.getImplementation().getConstructor().newInstance();
+                // change classifer with wrapper feature selection meta-classifier if requested
+                if (requestedFeatureSelectionApproaches.contains(FeatureSelectionApproach.WRAPPER)){
+                    AttributeSelectedClassifier wrapper = new AttributeSelectedClassifier();
+                    GreedyStepwise search = new GreedyStepwise();
+                    ASEvaluation eval = new CfsSubsetEval();
+                    search.setSearchBackwards(isFeatureSearchBackward);
+                    wrapper.setClassifier(classifier);
+                    wrapper.setEvaluator(eval);
+                    wrapper.setSearch(search);
+                    classifier = wrapper;
+                }
+                
+                walkForward = new WalkForward(classifier, evaluationDataset);
+                while(walkForward.hasNext()){
+                    evaluation = walkForward.next();
+                    evaluation.setDatasetName(dataset.relationName());
+                    evaluation.setClassifier(requestedClassifier);
+                    evaluation.setFeatureSelectionApproaches(requestedFeatureSelectionApproaches);
+                    evaluation.setFeatureSearchBackward(isFeatureSearchBackward);
+                    evaluations.add(evaluation);
+                }
             }
         }
+        
         printEvaluations(evaluations);
     }
 
